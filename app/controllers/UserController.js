@@ -1,17 +1,17 @@
+const path = require('path');
+
 module.exports = {
     get: (req, res) => {
-        res.send(`
+        res.sendFile(path.join(__dirname, '../pages/user.html'));
+    },
+    post: (req, res) => {
 
-            <div style="display: flex; justify-content: center; align-items: center; height: 50vh;">
-                <form action="/User" method="post" style="text-align: center;">
-                    <h1 style="text-align: center;">Login</h1>
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username"><br><br>
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password"><br><br>
-                    <button type="connect">Connect</button>
-                </form>
-            </div>
-        `);
+
+
+        if (req.body.username === 'admin' && req.body.password === 'admin') {
+            res.sendFile(path.join(__dirname, '../pages/admin.html'));
+        } else {
+            res.sendFile(path.join(__dirname, '../pages/user.html'));
+        }
     }
 };
