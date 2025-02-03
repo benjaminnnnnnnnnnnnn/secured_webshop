@@ -1,14 +1,6 @@
 const express = require("express");
 const path = require("path");
-/*
-const https = require('https');
-const fs = require('fs');
-
-const options = {
-  key: fs.readFileSync('selfsigned.key'),
-  cert: fs.readFileSync('selfsigned.crt')};
-
-*/
+const db = require("./controllers/db_confing"); // Import the database configuration
 
 const app = express();
 
@@ -16,9 +8,8 @@ const app = express();
 app.use(express.json());
 
 const userRoute = require('./routes/User');
+
 app.use('/user', userRoute);
-
-
 
 app.use(express.static(path.join(__dirname, 'pages')));
 
@@ -26,9 +17,25 @@ app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'pages', 'login.html'));
 });
 
-// Démarrage du serveur
-app.listen(8080, () => {
-    console.log('Server running on port 8080');
+app.get('/Sign-up', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'signup.html'));
 });
 
-    //https.createServer(options, app).listen(8443);
+
+// Ensure the database connection is established before starting the server
+db.getConnection((err, connection) => {
+  if (err) {
+    console.error('Error connecting to the database:', err);
+    process.exit(1); // Exit the process if the database connection fails
+  } else {
+    console.log('Connected to the database');
+
+    // Start the server
+    app.listen(8080, () => {
+      console.log('Server running on port 8080');
+    });
+
+    // Release the connection back to the pool
+    connection.release();
+  }
+});
