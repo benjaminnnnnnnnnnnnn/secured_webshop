@@ -1,41 +1,56 @@
 const express = require("express");
 const path = require("path");
-const db = require("./controllers/db_confing"); // Import the database configuration
-
 const app = express();
 
 // Add this line to parse JSON bodies
 app.use(express.json());
 
-const userRoute = require('./routes/User');
+// Add this line to parse URL-encoded bodies
+app.use(express.urlencoded({ extended: true }));
+/*
+const mysql = require("mysql2");
 
-app.use('/user', userRoute);
-
-app.use(express.static(path.join(__dirname, 'pages')));
-
-app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'login.html'));
+// Create a connection to the database
+const connection = mysql.createConnection({
+	host: "localhost",
+	user: "root",
+	password: "root",
+	database: "db",
+	port: 6033,
 });
 
-app.get('/Sign-up', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'signup.html'));
+// Connect to the database
+connection.connect((err) => {
+	if (err) throw err;
+	console.log("Connected to MySQL Database!");
+
+	// Example query
+	connection.query("SELECT * FROM users", (err, results, fields) => {
+		if (err) throw err;
+		console.log(results);
+	});
+
+	// connection.release();
+});
+
+*/
+const userRoute = require("./routes/User");
+
+app.use("/user", userRoute);
+
+app.use(express.static(path.join(__dirname, "pages")));
+
+app.get("/login", (req, res) => {
+	res.sendFile(path.join(__dirname, "pages", "login.html"));
+});
+
+app.get("/Sign-up", (req, res) => {
+	res.sendFile(path.join(__dirname, "pages", "signup.html"));
 });
 
 
-// Ensure the database connection is established before starting the server
-db.getConnection((err, connection) => {
-  if (err) {
-    console.error('Error connecting to the database:', err);
-    process.exit(1); // Exit the process if the database connection fails
-  } else {
-    console.log('Connected to the database');
 
-    // Start the server
-    app.listen(8080, () => {
-      console.log('Server running on port 8080');
-    });
-
-    // Release the connection back to the pool
-    connection.release();
-  }
+// Start the server
+app.listen(8085, () => {
+	console.log("Server running on port 8085");
 });
