@@ -2,13 +2,72 @@
 <html>
 
 <body>
-    <h1>Wellcome Admin</h1>
+    <h1 id="welcomeMessage">Welcome Admin</h1>
     <form id="searchbar" style="text-align: center">
-        <label for="searchbar">search for an user :</label>
+        <label for="searchbar">Search for a user:</label>
         <input type="text" id="search" name="search" /><br /><br />
         <button type="submit">Search</button>
     </form>
+    
+    <h2>User List</h2>
+    <table id="userTable" border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>isAdmin</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
     <a href="/login">Logout</a>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const username = urlParams.get('username');
+            if (username) {
+                document.getElementById('welcomeMessage').textContent = `Welcome ${username}`;
+            }
+
+            document.getElementById('searchbar').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const searchQuery = document.getElementById('search').value;
+                
+                fetch(`/admin/users?search=${searchQuery}`)
+                .then(response => response.json())
+                .then(users => {
+                    const userTableBody = document.getElementById('userTable').getElementsByTagName('tbody')[0];
+                    userTableBody.innerHTML = '';
+                    users.forEach(user => {
+                        const row = userTableBody.insertRow();
+                        row.insertCell(0).textContent = user.id;
+                        row.insertCell(1).textContent = user.username;
+                        row.insertCell(2).textContent = user.password;
+                        row.insertCell(3).textContent = user.isAdmin;
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+            });
+            
+            // Fetch all users on page load
+            fetch('/admin/users')
+            .then(response => response.json())
+            .then(users => {
+                const userTableBody = document.getElementById('userTable').getElementsByTagName('tbody')[0];
+                userTableBody.innerHTML = '';
+                users.forEach(user => {
+                    const row = userTableBody.insertRow();
+                    row.insertCell(0).textContent = user.id;
+                    row.insertCell(1).textContent = user.username;
+                    row.insertCell(2).textContent = user.password;
+                    row.insertCell(3).textContent = user.isAdmin;
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
 </body>
 
 </html>

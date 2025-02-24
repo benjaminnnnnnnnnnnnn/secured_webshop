@@ -2,8 +2,18 @@
 <html>
 
 <body>
-    <h1>Wellcome User</h1>
+    <h1 id="welcomeMessage">Welcome User</h1>
     <a href="/login">Logout</a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const username = urlParams.get('username');
+            if (username) {
+                document.getElementById('welcomeMessage').textContent = `Welcome ${username}`;
+            }
+        });
+    </script>
 </body>
 
 </html>
