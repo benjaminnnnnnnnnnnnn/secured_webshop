@@ -13,10 +13,13 @@ const sslOptions = {
 // Add this line to parse JSON bodies
 app.use(express.json());
 
+
+
 // Add this line to parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
 
 const userRoute = require("./routes/User");
+const verifyToken = require("./auth/authMiddleware");
 
 app.use("/user", userRoute);
 
@@ -32,7 +35,7 @@ app.get("/Sign-up", (req, res) => {
 
 const userController = require('./controllers/UserController');
 
-app.get('/admin/users', userController.getUsers);
+app.get('/admin/users', verifyToken, userController.getUsers);
 
 https.createServer(sslOptions, app).listen(443, () => {
   console.log("Server running on port 443");

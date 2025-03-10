@@ -97,6 +97,7 @@
                 return response.json();
             })
             .then(data => {
+                localStorage.setItem('token', data.token);
                 if (data.isAdmin) {
                     window.location.href = `/admin.html?username=${data.username}`;
                 } else {

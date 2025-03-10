@@ -1,12 +1,23 @@
 const path = require('path');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const connection = require('../db');
+const { verify } = require('crypto');
+
 
 const saltRounds = 10;
+const secretKey = 'your_secret_key'; // Replace with your actual secret key
 
 module.exports = {
     get: (req, res) => {
-        res.sendFile(path.join(__dirname, '../pages/user.html'));
+        jwt.verify(token, secretKey, (err, decoded) => {
+            if (err) {
+                console.log('No token provided');
+                return res.redirect('/login');
+            }
+
+            res.sendFile(path.join(__dirname, '../pages/user.html'));
+        });
     },
 
     post: (req, res) => {
@@ -18,7 +29,8 @@ module.exports = {
                     if (err) throw err;
 
                     if (result) {
-                        res.json({ isAdmin: results[0].isAdmin === 1, username: results[0].username });
+                        const token = jwt.sign({ username: results[0].username, isAdmin: results[0].isAdmin }, secretKey, { expiresIn: '1h' });
+                        res.json({ token, isAdmin: results[0].isAdmin === 1, username: results[0].username });
                     } else {
                         res.status(401).json({ error: 'Invalid username or password' });
                     }
@@ -47,6 +59,8 @@ module.exports = {
 
                     connection.query(`INSERT INTO Users (id, username, password, isAdmin) VALUES (?, ?, ?, 0)`, [newid, username, hash], (err) => {
                         if (err) throw err;
+                        const token = jwt.sign({ username: results[0].username, isAdmin: results[0].isAdmin }, secretKey, { expiresIn: '1h' });
+                        res.json({ token, isAdmin: results[0].isAdmin === 1, username: results[0].username });
                         res.sendFile(path.join(__dirname, '../pages/user.html'));
                     });
                 });
@@ -55,10 +69,19 @@ module.exports = {
     },
 
     getUsers: (req, res) => {
-        const searchQuery = req.query.search ? `%${req.query.search}%` : '%';
-        connection.query(`SELECT id,username,password,isAdmin FROM Users WHERE username LIKE ?`, [searchQuery], (err, results) => {
-            if (err) throw err;
-            res.json(results);
+        const token = req.headers['authorization'];
+    
+        jwt.verify(token, secretKey, (err, decoded) => { 
+            if (err) {
+                console.log('No token provided');
+                res.sendFile(path.join(__dirname, '../pages/login.html'));
+            }
+    
+            const searchQuery = req.query.search ? `%${req.query.search}%` : '%';
+            connection.query(`SELECT id,username,password,isAdmin FROM Users WHERE username LIKE ?`, [searchQuery], (err, results) => {
+                if (err) throw err;
+                res.json(results);
+            });
         });
     }
 };
